@@ -5,27 +5,48 @@ import { calculatePrecalculatedData } from "./hooks/calculate";
 import ImportToCloudflare from "./components/ImportToCloudflare";
 export default function App() {
   const [result, setResult] = useState(null);
+  const [source, setSource] = useState("supabase");
+
 
   const handleCalculate = async () => {
-    const { data: rules, error: rulesError } = await supabase
-      .from("rules")
-      .select("*")
-      .order("priority_score", { ascending: false });
-
-    const { data: links, error: linksError } = await supabase
-      .from("links_maillage")
-      .select("*")
-      .order("score", { ascending: false });
-
-    if (rulesError || linksError) {
-      alert("Erreur lors du chargement des données Supabase");
-      return;
+    let rules, links;
+  
+    if (source === "supabase") {
+      const { data: rulesData, error: rulesError } = await supabase
+        .from("rules")
+        .select("*")
+        .order("priority_score", { ascending: false });
+  
+      const { data: linksData, error: linksError } = await supabase
+        .from("links_maillage")
+        .select("*")
+        .order("score", { ascending: false });
+  
+      if (rulesError || linksError) {
+        alert("Erreur lors du chargement des données Supabase");
+        return;
+      }
+  
+      rules = rulesData;
+      links = linksData;
+    } else if (source === "mysql") {
+      try {
+        const rulesRes = await fetch("http://localhost:3001/api/rules");
+        const linksRes = await fetch("http://localhost:3001/api/links");
+  
+        rules = await rulesRes.json();
+        links = await linksRes.json();
+      } catch (e) {
+        console.error("Erreur API MySQL :", e);
+        alert("Erreur lors du chargement via MySQL API");
+        return;
+      }
     }
-
+  
     const kv = calculatePrecalculatedData(rules, links);
     setResult(kv);
   };
-
+  
   console
 
   const download = () => {
@@ -41,7 +62,14 @@ export default function App() {
   return (
     <>
 <div className="p-4">
-  <ImportToCloudflare />
+  <div style={{ marginBottom: "1rem" }}>
+  <label>Choisir la source de données :</label>
+  <select value={source} onChange={(e) => setSource(e.target.value)}>
+    <option value="supabase">Supabase</option>
+    <option value="mysql">MySQL (via API)</option>
+  </select>
+</div>
+
   <hr />
 
   {result ? (

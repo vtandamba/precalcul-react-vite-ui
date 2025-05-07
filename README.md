@@ -1,13 +1,73 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+## Création d’un utilisateur MySQL `user` avec mot de passe `root`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Option 1 — Tous les droits (sur toutes les bases) : rapide pour développement local
 
-## Expanding the ESLint configuration
+```sql
+CREATE USER 'user'@'localhost' IDENTIFIED BY 'root';
+GRANT ALL PRIVILEGES ON *.* TO 'user'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-# precalcul-react-vite-ui
+ 
+
+### Option 2 — Droits uniquement sur la base `neper` (plus sécurisé)
+
+1. Créer la base (si elle n'existe pas déjà) :
+
+```sql
+CREATE DATABASE IF NOT EXISTS neper;
+```
+
+2. Créer l’utilisateur avec mot de passe `root` et lui donner les droits uniquement sur la base `neper` :
+
+```sql
+CREATE USER 'user'@'localhost' IDENTIFIED BY 'root';
+GRANT ALL PRIVILEGES ON neper.* TO 'user'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+---
+
+Tu peux exécuter ces requêtes dans le terminal MySQL après t’être connecté en root :
+
+```bash
+mysql -u root -p
+```
+
+Et ensuite coller les commandes ci-dessus.
+
+---
+
+Tu veux aussi un test de connexion dans un script Node.js ?
+
+
+ 
+ # MISE EN PLACE DU SERVER 
+## PARTIE 1
+```bash
+# installe le serveur MySQL (si pas déjà fait)
+sudo apt install mysql-server     # sous Linux
+brew install mysql                # sous Mac
+choco install mysql               # sous Windows avec Chocolatey
+```
+
+## ou se rendre sur le site 
+*https://dev.mysql.com/downloads/installer/* 
+
+## PARTIE 2
+```bash
+# installer les modules côté Node
+npm install express mysql2 cors
+``` 
+#### LANCER LE SERVER
+
+node server.js
+
+
+ -- -- -- 
+
+
+## lib utiles
+https://dbeaver.io/download/
